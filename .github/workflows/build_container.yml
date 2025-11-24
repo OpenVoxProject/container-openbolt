@@ -111,7 +111,7 @@ jobs:
             ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
             ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
 
-          docker buildx imagetools create -t docker.io/$voxpupuli/openbolt:${{ matrix.rubygem_openbolt }}-latest \
+          docker buildx imagetools create -t docker.io/voxpupuli/openbolt:${{ matrix.rubygem_openbolt }}-latest \
             ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
             ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
 
