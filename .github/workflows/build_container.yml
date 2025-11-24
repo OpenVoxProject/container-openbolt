@@ -13,6 +13,16 @@ permissions:
   contents: read
 
 jobs:
+  downcase:
+    runs-on: ubuntu-latest
+    outputs:
+      repository_owner: ${{ steps.downcase.outputs.repository_owner }}
+    steps:
+      - name: Downcase Git ref name
+        id: downcase
+        run: |
+          echo "repository_owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
   setup-matrix:
     runs-on: ubuntu-latest
     outputs:
@@ -36,7 +46,9 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: setup-matrix
+    needs:
+      - downcase
+      - setup-matrix
     strategy:
       matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
@@ -53,7 +65,7 @@ jobs:
           docker_username: voxpupulibot
           docker_password: ${{ secrets.DOCKERHUB_BOT_ADMIN_TOKEN }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-${{ matrix.platform }}
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-${{ matrix.platform }}
 
   create-multiarch-manifests:
     runs-on: ubuntu-latest
@@ -61,6 +73,7 @@ jobs:
       contents: read
       packages: write
     needs:
+      - downcase
       - setup-matrix
       - build-and-push-container
     strategy:
@@ -70,7 +83,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ needs.downcase.outputs.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to the docker.io registry
@@ -82,29 +95,29 @@ jobs:
 
       - name: Create multiarch manifests
         run: |
-          docker buildx imagetools create -t ghcr.io/${{ github.repository_owner }}/openbolt:${{ matrix.rubygem_openbolt }}-${{ github.ref_name }} \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
+          docker buildx imagetools create -t ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ matrix.rubygem_openbolt }}-${{ github.ref_name }} \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
 
-          docker buildx imagetools create -t ghcr.io/${{ github.repository_owner }}/openbolt:${{ matrix.rubygem_openbolt }}-latest \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
+          docker buildx imagetools create -t ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ matrix.rubygem_openbolt }}-latest \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
 
-          docker buildx imagetools create -t ghcr.io/${{ github.repository_owner }}/openbolt:latest \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
+          docker buildx imagetools create -t ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:latest \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
 
-          docker buildx imagetools create -t docker.io/${{ github.repository_owner }}/openbolt:${{ matrix.rubygem_openbolt }}-${{ github.ref_name }} \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
+          docker buildx imagetools create -t docker.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ matrix.rubygem_openbolt }}-${{ github.ref_name }} \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
 
-          docker buildx imagetools create -t docker.io/${{ github.repository_owner }}/openbolt:${{ matrix.rubygem_openbolt }}-latest \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
+          docker buildx imagetools create -t docker.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ matrix.rubygem_openbolt }}-latest \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
 
-          docker buildx imagetools create -t docker.io/${{ github.repository_owner }}/openbolt:latest \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
-            ghcr.io/${{ github.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
+          docker buildx imagetools create -t docker.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:latest \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64 \
+            ghcr.io/${{ needs.downcase.outputs.repository_owner }}/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
 
   update-dockerhub-description:
     runs-on: ubuntu-latest
