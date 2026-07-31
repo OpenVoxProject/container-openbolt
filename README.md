@@ -23,7 +23,7 @@ For OpenBolt usage have a look at the upstream documentation <https://github.com
 
 To see which tool versions are included in the container see:
 
-[build_versions.yaml](build_versions.yaml)
+[Containerfile](Containerfile)
 
 ## How to release?
 

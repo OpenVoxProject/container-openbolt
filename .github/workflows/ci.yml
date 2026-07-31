@@ -36,7 +36,7 @@ jobs:
 
       - name: Generate build matrix
         id: build-matrix
-        run: echo "build-matrix=$(bash matrix.sh build)" >> "$GITHUB_OUTPUT"
+        run: echo "build-matrix=$(yq -o=json build_platforms.yaml | jq -c)" >> "$GITHUB_OUTPUT"
 
   build-container:
     name: Build ${{ matrix.platform }} CI container
@@ -58,13 +58,9 @@ jobs:
         with:
           context: .
           file: Containerfile
-          tags: 'ci/openbolt:${{ matrix.rubygem_openbolt }}'
+          tags: 'ci/openbolt:${{ matrix.platform }}'
           push: false
           platforms: linux/${{ matrix.platform }}
-          build-args: |
-            BASE_IMAGE=${{ matrix.base_image }}
-            RUBYGEM_BUNDLER=${{ matrix.rubygem_bundler }}
-            RUBYGEM_OPENBOLT=${{ matrix.rubygem_openbolt }}
 
       - name: Checkout test repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -73,7 +69,12 @@ jobs:
 
       - name: Test image
         run: |
-          docker run --rm -v "$PWD:/repo:Z" ci/openbolt:${{ matrix.rubygem_openbolt }} -h
+          docker run --rm -v "$PWD:/repo:Z" ci/openbolt:${{ matrix.platform }} -h
+
+      - name: Run post-test diagnostics
+        run: |
+          docker run --rm --entrypoint=ash ci/openbolt:${{ matrix.platform }} -c "bundle check"
+          docker run --rm --entrypoint=ash ci/openbolt:${{ matrix.platform }} -c "bundle env"
 
   tests:
     name: Test suite
