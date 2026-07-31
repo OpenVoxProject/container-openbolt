@@ -61,20 +61,10 @@ RUN apk update \
     && apk upgrade \
     && gem install bundler -v ${RUBYGEM_BUNDLER} \
     # CVE fixes are installed in the OpenBolt bundle, so remove vulnerable default gems.
-    && rm -rf /usr/local/lib/ruby/gems/*/gems/cgi-* \
-    && rm -rf /usr/local/lib/ruby/gems/*/specifications/default/cgi-*.gemspec \
-    && rm -rf /usr/local/lib/ruby/gems/*/gems/stringio-* \
-    && rm -rf /usr/local/lib/ruby/gems/*/specifications/default/stringio-*.gemspec \
-    && rm -rf /usr/local/lib/ruby/gems/*/gems/rdoc-* \
-    && rm -rf /usr/local/lib/ruby/gems/*/specifications/default/rdoc-*.gemspec \
-    && rm -rf /usr/local/lib/ruby/gems/*/gems/racc-* \
-    && rm -rf /usr/local/lib/ruby/gems/*/specifications/default/racc-*.gemspec \
-    && rm -rf /usr/local/lib/ruby/gems/*/gems/drb-* \
-    && rm -rf /usr/local/lib/ruby/gems/*/specifications/default/drb-*.gemspec \
-    && rm -rf /usr/local/lib/ruby/gems/*/gems/csv-* \
-    && rm -rf /usr/local/lib/ruby/gems/*/specifications/default/csv-*.gemspec \
-    && rm -rf /usr/local/lib/ruby/gems/*/gems/minitest-* \
-    && rm -rf /usr/local/lib/ruby/gems/*/specifications/minitest-*.gemspec \
+    && rm -rf /usr/local/lib/ruby/gems/*/gems/erb-* \
+    && rm -rf /usr/local/lib/ruby/gems/*/specifications/default/erb-*.gemspec \
+    && rm -rf /usr/local/lib/ruby/gems/*/gems/net-imap-* \
+    && rm -rf /usr/local/lib/ruby/gems/*/specifications/net-imap-*.gemspec \
     && addgroup -g 1001 -S openbolt \
     && adduser -u 1001 -S -G openbolt openbolt \
     && mkdir /data \
