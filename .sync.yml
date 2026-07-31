@@ -1,39 +1,46 @@
 ---
 :global:
-  matrix_command: bash matrix.sh build
+  matrix_command: yq -o=json build_platforms.yaml | jq -c
   matrix_requires_yq: true
   build_runner: '${{ matrix.runner }}'
-  image_tag: 'ci/openbolt:${{ matrix.rubygem_openbolt }}'
+  image_tag: 'ci/openbolt:${{ matrix.platform }}'
   build_platforms: 'linux/${{ matrix.platform }}'
-  build_args:
-    - 'BASE_IMAGE=${{ matrix.base_image }}'
-    - 'RUBYGEM_BUNDLER=${{ matrix.rubygem_bundler }}'
-    - 'RUBYGEM_OPENBOLT=${{ matrix.rubygem_openbolt }}'
 .github/workflows/ci.yml:
   build_job_name: 'Build ${{ matrix.platform }} CI container'
   test_repository: voxpupuli/puppet-example
   test_commands:
-    - 'docker run --rm -v "$PWD:/repo:Z" ci/openbolt:${{ matrix.rubygem_openbolt }} -h'
+    - 'docker run --rm -v "$PWD:/repo:Z" ci/openbolt:${{ matrix.platform }} -h'
+  post_test_commands:
+    - 'docker run --rm --entrypoint=ash ci/openbolt:${{ matrix.platform }} -c "bundle check"'
+    - 'docker run --rm --entrypoint=ash ci/openbolt:${{ matrix.platform }} -c "bundle env"'
 .github/workflows/security_scanning.yml:
   scan_job_name: 'Scan ${{ matrix.platform }} container'
   sarif_category: 'grype-${{ matrix.platform }}'
 .github/workflows/build_container.yml:
-  publish_build_job_name: 'Build OpenBolt ${{ matrix.rubygem_openbolt }} (${{ matrix.platform }})'
+  publish_build_job_name: 'Build OpenBolt (${{ matrix.platform }})'
   publish_build_arch: 'linux/${{ matrix.platform }}'
   publish_tags:
-    - 'ghcr.io/openvoxproject/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-${{ matrix.platform }}'
-  publish_manifest_matrix_command: bash matrix.sh tag
+    - 'ghcr.io/openvoxproject/openbolt:${{ github.sha }}-${{ matrix.platform }}'
+  publish_setup_outputs:
+    openbolt-version: '${{ steps.openbolt-version.outputs.value }}'
+  publish_setup_steps:
+    - name: Read OpenBolt version
+      id: openbolt-version
+      commands:
+        - value=$(sed -n 's/^ARG RUBYGEM_OPENBOLT=//p' Containerfile)
+        - test -n "$value" || { echo "RUBYGEM_OPENBOLT default is missing" >&2; exit 1; }
+        - echo "value=$value" >> "$GITHUB_OUTPUT"
   publish_manifest_steps:
     - name: Create multi-architecture manifests
       commands:
         - >-
           docker buildx imagetools create
-          -t ghcr.io/openvoxproject/openbolt:${{ matrix.rubygem_openbolt }}-${{ github.ref_name }}
-          -t ghcr.io/openvoxproject/openbolt:${{ matrix.rubygem_openbolt }}-latest
+          -t ghcr.io/openvoxproject/openbolt:${{ needs.setup-matrix.outputs.openbolt-version }}-${{ github.ref_name }}
+          -t ghcr.io/openvoxproject/openbolt:${{ needs.setup-matrix.outputs.openbolt-version }}-latest
           -t ghcr.io/openvoxproject/openbolt:latest
-          -t docker.io/voxpupuli/openbolt:${{ matrix.rubygem_openbolt }}-${{ github.ref_name }}
-          -t docker.io/voxpupuli/openbolt:${{ matrix.rubygem_openbolt }}-latest
+          -t docker.io/voxpupuli/openbolt:${{ needs.setup-matrix.outputs.openbolt-version }}-${{ github.ref_name }}
+          -t docker.io/voxpupuli/openbolt:${{ needs.setup-matrix.outputs.openbolt-version }}-latest
           -t docker.io/voxpupuli/openbolt:latest
-          ghcr.io/openvoxproject/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-arm64
-          ghcr.io/openvoxproject/openbolt:${{ github.sha }}-v${{ matrix.rubygem_openbolt }}-amd64
+          ghcr.io/openvoxproject/openbolt:${{ github.sha }}-arm64
+          ghcr.io/openvoxproject/openbolt:${{ github.sha }}-amd64
   dockerhub_repository: voxpupuli/openbolt
