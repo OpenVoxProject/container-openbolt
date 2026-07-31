@@ -2,7 +2,7 @@ ARG BASE_IMAGE=docker.io/library/ruby:3.2-alpine
 
 # Define gem versions once; each stage imports these global defaults below.
 # renovate: depName=bundler datasource=rubygems
-ARG RUBYGEM_BUNDLER=2.7.2
+ARG RUBYGEM_BUNDLER=4.0.17
 # renovate: depName=openbolt datasource=rubygems
 ARG RUBYGEM_OPENBOLT=5.6.0
 
