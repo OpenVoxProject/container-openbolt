@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=docker.io/library/ruby:3.2-alpine
+ARG BASE_IMAGE=docker.io/library/ruby:4.0-alpine
 
 # Define gem versions once; each stage imports these global defaults below.
 # renovate: depName=bundler datasource=rubygems
