@@ -4,7 +4,7 @@ ARG BASE_IMAGE=docker.io/library/ruby:3.2-alpine
 # renovate: depName=bundler datasource=rubygems
 ARG RUBYGEM_BUNDLER=2.7.2
 # renovate: depName=openbolt datasource=rubygems
-ARG RUBYGEM_OPENBOLT=5.2.0
+ARG RUBYGEM_OPENBOLT=5.6.0
 
 FROM $BASE_IMAGE AS builder
 
