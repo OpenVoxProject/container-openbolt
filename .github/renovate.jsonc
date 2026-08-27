@@ -12,7 +12,6 @@
   "assigneesFromCodeOwners": true,
   "customManagers": [
     {
-      // Track gem versions set as global RUBYGEM_* build arguments in Containerfiles.
       "customType": "regex",
       "datasourceTemplate": "rubygems",
       "versioningTemplate": "ruby",
@@ -20,7 +19,7 @@
         "/Containerfile/"
       ],
       "matchStrings": [
-        "#\\s*renovate:\\s*depName=(?<depName>[a-zA-Z0-9_-]+)\\s+datasource=rubygems\\s*\\n\\s*ARG\\s+RUBYGEM_[A-Z0-9_-]+=(?<currentValue>[^\\s]+)"
+        "#\\s*renovate:\\s*datasource=rubygems\\s+depName=(?<depName>[a-z0-9_-]+)\\s*\\n\\s*ARG\\s+RUBYGEM_[A-Z0-9_]+=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ]
     }
   ],
