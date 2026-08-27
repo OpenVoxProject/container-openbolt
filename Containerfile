@@ -57,6 +57,9 @@ ENV BUNDLE_GEMFILE=/opt/openbolt/Gemfile
 ENV BUNDLE_PATH=/opt/openbolt/vendor/bundle
 ENV BUNDLE_APP_CONFIG=/opt/openbolt/vendor/bundle
 
+# We set this to silence the warning that OpenBolt is installed as a gem.
+ENV BOLT_GEM=true
+
 RUN apk update \
     && apk upgrade \
     && gem install bundler -v ${RUBYGEM_BUNDLER} \
