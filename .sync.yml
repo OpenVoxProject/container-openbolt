@@ -5,6 +5,16 @@
   build_runner: '${{ matrix.runner }}'
   image_tag: 'ci/openbolt:${{ matrix.platform }}'
   build_platforms: 'linux/${{ matrix.platform }}'
+.github/renovate.jsonc:
+  renovate_custom_managers:
+    - customType: regex
+      datasourceTemplate: rubygems
+      versioningTemplate: ruby
+      managerFilePatterns:
+        - /Containerfile/
+      matchStrings:
+        - >-
+          #\s*renovate:\s*datasource=rubygems\s+depName=(?<depName>[a-z0-9_-]+)\s*\n\s*ARG\s+RUBYGEM_[A-Z0-9_]+=(?<currentValue>\d+\.\d+\.\d+)
 .github/workflows/ci.yml:
   build_job_name: 'Build ${{ matrix.platform }} CI container'
   test_repository: voxpupuli/puppet-example
