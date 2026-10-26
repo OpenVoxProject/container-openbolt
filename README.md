@@ -109,6 +109,9 @@ It is kept separate from the Ruby installation provided by the base image.
 The build also installs patched versions of selected default gems.
 These versions provide security fixes newer than those included with the Ruby base image.
 
+The bundle includes the `ed25519` and `bcrypt_pbkdf` gems, as the OpenBolt OS packages do.
+net-ssh needs them to read private keys in the OpenSSH format, which `ssh-keygen` writes by default and which every ed25519 key uses.
+
 You can inspect the bundle state without invoking the OpenBolt entry point:
 
 ```shell

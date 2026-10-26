@@ -4,6 +4,13 @@ source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
 gem 'openbolt',             ENV['RUBYGEM_OPENBOLT']
 
+# net-ssh needs these to read private keys in the OpenSSH format, which
+# ssh-keygen writes by default and which every ed25519 key uses. They are
+# optional dependencies of net-ssh, so the openbolt gem does not pull them in;
+# the OpenBolt OS packages ship both.
+gem 'ed25519',              '~> 1.2'
+gem 'bcrypt_pbkdf',         '~> 1.0'
+
 # CVE fixes
 
 # Older fixes have been updated in the 3.2 minor releases:
